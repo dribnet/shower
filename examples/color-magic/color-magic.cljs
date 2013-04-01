@@ -12,19 +12,18 @@
   :remove (fn [userId z] true)
   :update (fn [userId z] true)}))
 
-(def colors [
-  "#1f77b4" "#aec7e8" "#ff7f0e" "#ffbb78"
-  "#2ca02c" "#98df8a" "#d62728" "#ff9896"
-  "#9467bd" "#c5b0d5" "#8c564b" "#c49c94"
-  "#e377c2" "#f7b6d2" "#7f7f7f" "#c7c7c7"
-  "#bcbd22" "#dbdb8d" "#17becf" "#9edae5"
-])
+(defn grid-class-from-id [id]
+  (if-let [element (-> Game (.findOne {:index id}))]
+    (do ;(.log js/console (.-color element))
+        (str "q" (.-color element) "-20"))
+    "empty"))
 
 (when (-> Meteor .-isClient)
   (-> Meteor (.startup (fn []
-    (-> Session (.set "mycolor" (rand-nth colors))))))
+    (-> Session (.set "mycolor" (rand-int 20))))))
 
   (aset (-> Template .-grid) "gridMaker" (fn [a b classname]
+    ; (.log js/console "gridmaker")
     (hiccups/html
       [:table {:class classname}
       (for [i (range a)]
@@ -32,19 +31,7 @@
           (for [j (range b)]
             (let [id (str i "-" j)]
               [:td {:id id
-                    :class (-> Template .-grid (.style id))
-                    :style (str "background-color:" 
-                      (-> Template .-grid (.color id)))}]))])])))
-
-  (aset (-> Template .-grid) "style" (fn [id]
-    (if (empty? (-> Game (.find {:index id}) (.fetch)))
-      "selected"
-      "")))
-
-  (aset (-> Template .-grid) "color" (fn [id]
-    (if-let [element (-> Game (.findOne {:index id}))]
-      (.-color element)
-      "white")))
+                    :class (grid-class-from-id id)}]))])])))
 
   (-> Template .-grid (.events (clj->js {
     "click .grid td" (fn [e]
