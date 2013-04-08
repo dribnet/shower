@@ -1,10 +1,13 @@
 (ns color-magic
-  (:require-macros [hiccups.core :as hiccups])
-  (:require [hiccups.runtime :as hiccupsrt]
-            [shower :refer [bootstrap 
-                            Meteor Collection Session Template]]))
+  (:require-macros 
+    [hiccups.core :as hiccups]
+    [mrhyde.reader])
+  (:require 
+    [hiccups.runtime :as hiccupsrt]
+    [mrhyde.extend-js]
+    [shower :refer [Meteor Collection Session Template]]))
 
-(bootstrap)
+(shower/bootstrap)
 
 (def Game (Collection. "game"))
 (-> Game (.allow {
@@ -15,14 +18,14 @@
 (defn grid-class-from-id [id]
   (if-let [element (-> Game (.findOne {:index id}))]
     (do ;(.log js/console (.-color element))
-        (str "q" (.-color element) "-20"))
+        (str "q" (:color element) "-20"))
     "empty"))
 
-(when (-> Meteor .-isClient)
+(when (:isClient Meteor)
   (-> Meteor (.startup (fn []
     (-> Session (.set "mycolor" (rand-int 20))))))
 
-  (aset (-> Template .-grid) "gridMaker" (fn [a b classname]
+  (aset (:grid Template) "gridMaker" (fn [a b classname]
     ; (.log js/console "gridmaker")
     (hiccups/html
       [:table {:class classname}
@@ -33,9 +36,9 @@
               [:td {:id id
                     :class (grid-class-from-id id)}]))])])))
 
-  (-> Template .-grid (.events (clj->js {
+  (-> (:grid Template) (.events (clj->js {
     "click .grid td" (fn [e]
-      (let [id (-> e .-currentTarget .-id)
+      (let [id (get-in e [:currentTarget :id])
             time (.getTime (js/Date.))]
         (if (empty? (-> Game (.find {:index id}) (.fetch)))
           (-> Game (.insert {
@@ -49,7 +52,7 @@
   })))
 )
 
-(when (-> Meteor .-isServer)
+(when (:isServer Meteor)
   (-> Meteor (.startup (fn []
     ; startup code...
     )))
