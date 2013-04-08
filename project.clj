@@ -8,15 +8,20 @@
 
   :plugins [[lein-cljsbuild "0.3.0"]]
 
-  :cljsbuild {:builds [{:source-paths ["src/cljs"]
-                        :compiler  {:optimizations :simple
-                                    :pretty-print true
-                                    :output-to "out/shower.js"}
-                        :jar true}
+  :cljsbuild {:builds 
+    [{:source-paths ["src/cljs"]
+      :compiler  {:optimizations :simple
+                  :pretty-print true
+                  :output-to "out/shower.js"}
+      :jar true}
 
-                      ; examples
-                       {:source-paths ["src/cljs" "examples/color-magic"]
-                        :compiler  {:optimizations :simple
-                                    :pretty-print true
-                                    :output-to "color-magic/color-magic.js"}}
-                                    ]})
+    ; examples
+     {:source-paths ["src/cljs" "examples/color-magic"]
+      :compiler  {:optimizations :simple
+                  :pretty-print true
+                  :output-to "color-magic/color-magic.js"}}
+     {:source-paths ["src/cljs" "examples/leaderboard"]
+      :compiler  {:optimizations :simple
+                  :pretty-print true
+                  :output-to "leaderboard/leaderboard.js"}}
+                  ]})

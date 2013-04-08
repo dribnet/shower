@@ -25,7 +25,7 @@
   (-> Meteor (.startup (fn []
     (-> Session (.set "mycolor" (rand-int 20))))))
 
-  (aset (:grid Template) "gridMaker" (fn [a b classname]
+  (assoc! (:grid Template) :gridMaker (fn [a b classname]
     ; (.log js/console "gridmaker")
     (hiccups/html
       [:table {:class classname}
