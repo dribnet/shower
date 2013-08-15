@@ -11,3 +11,5 @@ pom.xml
 .lein-cljsbuild-compiler*
 /out
 *~
+color-magic/color-magic.js
+leaderboard/leaderboard.js
