@@ -13,8 +13,8 @@
 
 (when (-> Meteor .-isClient)
   (aset (-> Template .-leaderboard) "players" (fn []
-      (-> Players (.find (jso {}) (jso {:sort {:score -1 
-                                               :name   1}})))))
+      (-> Players (.find (jso {}) {:sort {:score -1 
+                                          :name   1}}))))
   (aset (-> Template .-leaderboard) "selected_name" (fn []
       (if-let [p (-> Players (.findOne (-> Session (.get "selected_player"))))]
         (aget p "name")
@@ -32,9 +32,9 @@
                            (jso {"$inc" {:score 5}}))))
     })))
 
-  (-> Template .-player (.events (clj->js {
-    "click" (fn [] (this-as ct (-> Session (.set "selected_player" (-> ct .-_id)))))
-    })))
+  (-> Template .-player (.events {
+    :click (fn [] (this-as ct (-> Session (.set "selected_player" (-> ct .-_id)))))
+    }))
 )
 
 (def names ["Ada Lovelace"
@@ -47,9 +47,7 @@
 (when (-> Meteor .-isServer)
   (-> Meteor (.startup (fn []
       (when (zero? (-> Players (.find) (.count)))
-        (.log js/console "Zero means zero")
         (doseq [n names]
-          (.log js/console n)
           (-> Players (.insert (jso {:name n :score (* 5 (rand-int 10))})))))
     )))
 )
