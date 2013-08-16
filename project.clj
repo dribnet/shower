@@ -24,4 +24,10 @@
                         :compiler  {:optimizations :simple
                                     :pretty-print true
                                     :output-to "leaderboard/leaderboard.js"}}                                    
+
+                       {:source-paths ["src/cljs" "examples/parties/server"]
+                        :compiler  {:optimizations :simple
+                                    :pretty-print true
+                                    :output-to "parties/server/server_js.bad"}}                                    
+
                                     ]})
