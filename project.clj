@@ -2,7 +2,7 @@
   :description "shower: experimental meteorjs library"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [hiccups "0.2.0"]
-                 [net.drib/mrhyde "0.5.2"]]
+                 [net.drib/mrhyde "0.5.3-SNAPSHOT"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj" "src/cljs"]
 

@@ -1,6 +1,4 @@
 (ns leaderboard
-  (:require-macros 
-    [mrhyde.jso :refer [jso]])
   (:require 
     [shower :refer [Meteor Collection Session Template]]))
 
@@ -13,8 +11,8 @@
 
 (when (-> Meteor .-isClient)
   (aset (-> Template .-leaderboard) "players" (fn []
-      (-> Players (.find (jso {}) {:sort {:score -1 
-                                          :name   1}}))))
+      (-> Players (.find {} {:sort {:score -1 
+                                    :name   1}}))))
   (aset (-> Template .-leaderboard) "selected_name" (fn []
       (if-let [p (-> Players (.findOne (-> Session (.get "selected_player"))))]
         (aget p "name")
@@ -26,11 +24,11 @@
           "selected"
           ""))))
 
-  (-> Template .-leaderboard (.events (clj->js {
-    "click input.inc" (fn [] 
+  (-> Template .-leaderboard (.events {
+    (keyword "click input.inc") (fn [] 
       (-> Players (.update (-> Session (.get "selected_player")) 
-                           (jso {"$inc" {:score 5}}))))
-    })))
+                           {(keyword "$inc") {:score 5}})))
+    }))
 
   (-> Template .-player (.events {
     :click (fn [] (this-as ct (-> Session (.set "selected_player" (-> ct .-_id)))))
@@ -48,7 +46,7 @@
   (-> Meteor (.startup (fn []
       (when (zero? (-> Players (.find) (.count)))
         (doseq [n names]
-          (-> Players (.insert (jso {:name n :score (* 5 (rand-int 10))})))))
+          (-> Players (.insert {:name n :score (* 5 (rand-int 10))}))))
     )))
 )
 
