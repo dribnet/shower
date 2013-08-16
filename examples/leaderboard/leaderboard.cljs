@@ -1,39 +1,40 @@
 (ns leaderboard
   (:require 
-    [shower :refer [Meteor Collection Session Template]]))
+    [mrhyde.extend-js :refer [assoc-in! update-in!]]
+    [shower :refer [make-collection template-events template-assoc Session]]))
 
 (shower/bootstrap)
 
 ; Set up a collection to contain player information. On the server,
 ; it is backed by a MongoDB collection named "players".
 
-(def Players (Collection. "players"))
+(def players (make-collection "players"))
 
-(when (-> Meteor .-isClient)
-  (aset (-> Template .-leaderboard) "players" (fn []
-      (-> Players (.find {} {:sort {:score -1 
-                                    :name   1}}))))
-  (aset (-> Template .-leaderboard) "selected_name" (fn []
-      (if-let [p (-> Players (.findOne (-> Session (.get "selected_player"))))]
-        (aget p "name")
+(when (shower/is-client?)
+  (template-assoc [:leaderboard :players] 
+    (fn []
+      (.find players {} {:sort {:score -1 :name 1}})))
+
+  (template-assoc [:leaderboard :selected_name]
+    (fn []
+      (if-let [p (.findOne players (.get Session "selected_player"))]
+        (:name p)
         nil)))
 
-  (aset (-> Template .-player) "selected" (fn []
+  (template-assoc [:player :selected]
+    (fn []
       (this-as ct
-        (if (-> Session (.equals "selected_player" (-> ct .-_id)))
+        (if (.equals Session "selected_player" (:_id ct))
           "selected"
           ""))))
 
-  (-> Template .-leaderboard (.events {
-    (keyword "click input.inc") (fn [] 
-      (-> Players (.update (-> Session (.get "selected_player")) 
-                           {(keyword "$inc") {:score 5}})))
-    }))
+  (template-events :leaderboard "click input.inc"
+    (fn []
+      (.update players (.get Session "selected_player") {:$inc {:score 5}})))
 
-  (-> Template .-player (.events {
-    :click (fn [] (this-as ct (-> Session (.set "selected_player" (-> ct .-_id)))))
-    }))
-)
+  (template-events :player "click"
+    (fn [] 
+      (this-as ct (.set Session "selected_player" (:_id ct))))))
 
 (def names ["Ada Lovelace"
             "Grace Hopper"
@@ -42,11 +43,9 @@
             "Nikola Tesla"
             "Claude Shannon"])
 
-(when (-> Meteor .-isServer)
-  (-> Meteor (.startup (fn []
-      (when (zero? (-> Players (.find) (.count)))
+(when (shower/is-server?)
+  (shower/startup 
+    (fn []
+      (when (zero? (-> players (.find) (.count)))
         (doseq [n names]
-          (-> Players (.insert {:name n :score (* 5 (rand-int 10))}))))
-    )))
-)
-
+          (.insert players {:name n :score (* 5 (rand-int 10))}))))))
